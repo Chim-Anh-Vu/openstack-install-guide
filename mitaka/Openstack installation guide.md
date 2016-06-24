@@ -5,10 +5,6 @@ Nói một cách dễ hiểu, OpenStack là một gói các dịch vụ cho phé
 
 Các dịch vụ chính trong OpenStack :
 
-First Header | Second Header
------------- | -------------
-Content from cell 1 | Content from cell 2
-Content in the first column | Content in the second column
 ***
 Dịch vụ | Tên Project | Mô tả
 ------------ | ------------- | -------------
