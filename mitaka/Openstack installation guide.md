@@ -301,10 +301,10 @@ Khởi đầu, User sẽ gửi thông tin xác thực là tên đăng nhập và
 
 ``` Service```: Dịch vụ trong OpenStack, như là dịch vụ điện toán (compute), dịch vụ lưu trữ (storage), dịch vụ cung cấp ảnh tệp (image). Các dịch vụ cung cấp các cổng đầu cuối (endpoint), là địa chỉ mà người dùng có thể truy cập vào để sử dụng tài nguyên hoặc thực hiện các thao tác.
 
-```sh Endpoint```: Là địa chỉ trên mạng, nơi mà người dùng có thể truy cập tới các dịch vụ, thường là 1 địa chỉ URL.
+``` Endpoint```: Là địa chỉ trên mạng, nơi mà người dùng có thể truy cập tới các dịch vụ, thường là 1 địa chỉ URL.
 Role: Quy định một tập các quyền mà người dùng có thể thực hiện trên hệ thống. Một User có thể có nhiều roles.Trong OpenStack, thì thẻ xác thực sẽ chứa luôn thông tin về các quyền mà 1 user có. Các dịch vụ dựa vào các quyền có trong thẻ xác thực để xác định xem người dùng có quyền thực hiện yêu cầu gửi tới dịch vụ đó hay không.
 
-Để xây dựng hệ thống phân quyền và xác thực, 3 khái niệm User, Project và Role có các mối quan hệ với nhau như sau:
+Để xây dựng hệ thống phân quyền và xác thực, 3 khái niệm ``` User```, ```Project``` và ```Role``` có các mối quan hệ với nhau như sau:
 
 Một Project khi được tạo ra sẽ được định nghĩa như một tập hợp các tài nguyên. Nếu một user được thêm vào 1 Project, user đó sẽ có một hoặc nhiều quyền (Role) đối với project đó. Mỗi một quyền sẽ quy định user được thực hiện những thao tác gì hoặc được sử dụng những tài nguyên gì trong project tương ứng. Một user có thể thuộc nhiều Project, và ở mỗi một project khác nhau user đó có thể có các tập quyền khác nhau.
 
