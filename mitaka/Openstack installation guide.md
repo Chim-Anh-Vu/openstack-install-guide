@@ -1,4 +1,4 @@
-#1 Giới thiệu về OpenStack
+#Giới thiệu về OpenStack
 OpenStack là một hệ thống cung cấp khả năng triển khai đám mây trên một nền tảng hệ thống máy chủ vật lý. Sử dụng OpenStack, người dùng có thể tạo ra, sử dụng và quản lý  một đám mây với các tài nguyên điện toán, lưu trữ và mạng thông qua  nhiều phương tiện khác nhau như giao diện dòng lệnh (CLI) hoặc thông qua giao diện web.
 
 Nói một cách dễ hiểu, OpenStack là một gói các dịch vụ cho phép thiết lập một đám mây trên 1 nền tảng vật lý. Điều kiện cần để triển khai OpenStack là chúng ta có một hệ thống máy chủ vật lý được kết nối với nhau. Sau đó trên từng đơn vị máy thành viên trong hệ thống sẽ được triển khai các dịch vụ của đám mây như: Xác thực(identity) , điện toán (compute), mạng(network), lưu trữ (storage), giao diện web… để tạo thành một đám mây hoàn chỉnh. Tùy thuộc vào dịch vụ được triển khai trên các máy vật lý, các tài nguyên vật lý sẽ được ánh xạ lên đám mây tạo ra các tài nguyên trên đám mây như các máy ảo, hệ thống lưu trữ và mạng.
@@ -25,7 +25,7 @@ Như ở sơ đồ trên, Controller node sẽ triển khai các dịch vụ li�
 2 node kết nối với nhau thông qua mạng quản lý Management network, mạng External network phục vụ cho việc truy cập internet và kết nối tới máy ảo.
 
 Sau khi tìm hiểu xong về phần cấu hình cài đặt, chúng ta đi vào phần cài đặt chi tiết các dịch vụ vào hệ thống.
-#2. Chuẩn bị môi trường cài đặt trên các node.
+#Chuẩn bị môi trường cài đặt trên các node.
 ##2.1 Thiết lập môi trường phần cứng
 Để thiết lập hệ thống, đầu tiên ta cần chuẩn bị môi trường.
 Môi trường triển khai hệ thống là VMWare workstation 12 trên windows 10.
@@ -279,7 +279,7 @@ Khởi động lại dịch vụ NTP
 ```sh
 	service chrony restart
 ```
-#3 Cài đặt Keystone
+#Cài đặt Keystone
 #3.1 Giới thiệu dịch vụ Keystone
 Dịch vụ Keystone là dịch vụ xác thực trong OpenStack (identity service),có vai trò cung cấp các chức năng quản lý xác thực, phân quyền và quản lý danh mục các services cho toàn bộ hệ thống. Bên cạnh đó, dịch vụ này lưu trữ thông tin các người sử dụng trong hệ thống. Tất cả các dữ liệu liên quan tới dịch vụ không được lưu trữ trực tiếp trong hệ thống OpenStack, mà được lưu trữ trong một hệ cơ sở dữ liệu như MySQL.
 ###3.1.1 Mô hình xác thực của Keystone
@@ -345,7 +345,7 @@ Hệ thống đang hoạt động có 3 thành phần chính: Dịch vụ Keysto
 22. Service A gửi kết quả thực hiện yêu cầu về cho user.
 
 
-#6 Cài đặt dịch vụ mạng của OpenStack
+#Cài đặt dịch vụ mạng của OpenStack
 ##6.1 Giới thiệu chung về dịch vụ mạng của OpenStack
 Một trong những yêu cầu quan trọng khi thiết lập một hệ thống đám mây là phải cung cấp cho các thành phần trong đám mây khả năng kết nối với nhau và kết nối ra bên ngoài, tức là cần thiết lập được một hệ thống mạng trong đám mây. Với đối tượng phục vụ kết nối mạng chính trong các đám mây là hệ thống máy ảo, đồng thời cùng với yêu cầu phải đảm bảo các tính chất của một đám mây- một hệ thống phân tán, OpenStack đã giải quyết bằng cách sử dụng một gói dịch vụ cho phép thiết lập một hệ thống mạng ảo trên đám mây. Gói dịch vụ cung cấp các dịch vụ mạng cho hệ thống OpenStack có tên là neutron.
 
@@ -462,17 +462,18 @@ source admin-openrc
 	openstack endpoint create --region RegionOne network admin http://controller:9696
 ```
 ####Tải về các dịch vụ của neutron
-- Ta tiến hành tải về các dịch vụ của neutron trên controller node:
+Ta tiến hành tải về các dịch vụ của neutron trên controller node:
 ```sh
 	apt-get -y install neutron-server neutron-plugin-ml2 \
 	neutron-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \ neutron-metadata-agent
 ```
 Tiếp theo, ta cấu hình các dịch vụ của neutron
+###6.3.3 Cấu hình cài đặt neutron
 Đầu tiên, ta cấu hình file /etc/neutron/neutron.conf:
-####Cấu hình để neutron sử dụng database:
+####Cấu hình để neutron sử dụng database
 Chỉnh sửa section [database] để neutron có thể sử dụng database neutron mà chúng ta vừa tạo ở phần trước:
 ```sh 
-	connection = mysql+pymysql://neutron:NEUTRON_DBPASS@controller/neutron
+	connection = mysql+pymysql://neutron:1111@controller/neutron
 ```
 Cấu hình để nova kích hoạt ml2 plugin, router services và ovelaping  ip address:
 ```sh
@@ -518,7 +519,7 @@ Cập nhật section [keystone_authtoken] để gán user neutron mà ta mới t
 	user_domain_id = default
 	project_name = service
 	username = neutron
-	password = neutron
+	password = 1111
 ```
 
 ####Cấu hình neutron để thông báo các sự kiện cho nova
@@ -541,6 +542,26 @@ Neutron cần thông báo cho Nova khi cấu hình mạng (network topology) tha
 	username = nova
 	password = nova
 ```
+
+####Cấu hình Neutron DHCP agent
+Dịch vụ ```neutron-dhcp-agent``` có chức năng tạo ra, quản lý, cấu hình và cung cấp các thông tin metadata về ```dnsmasq```, một loại DHCP ảo có chức năng cung cấp dịch vụ DHCP cho mạng ảo.
+Để cấu hình dịch vụ ```neutron-dhcp-agent```, chỉnh sửa file ```/etc/neutron/dhcp_agent.ini```, section [DEFAULT], chỉnh sửa option interface-driver sử dụng Linux-bridge, dhcp_drive sử dụng dnsmasq, và kích hoạt option enable_isolated_metadata để dhcp có thể đóng vai trò cung cấp metadata cho instance:
+```sh
+	[DEFAULT]
+	...
+	interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+	dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+	enable_isolated_metadata = True
+```
+###Cấu hình L3 agent
+Dịch vụ ```neutron-l3-agent``` có chức năng tạo ra và quản lý các router ảo trên hệ thống mạng ảo. Cấu hình file ```/etc/neutron/l3_agent.ini```, thiết lập interface_driver sử dụng Linux-bridge và để trống giá trị external_network_bridge =
+```sh
+	[DEFAULT]
+	...
+	interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+	external_network_bridge =
+```
+###Cấu hình Modular Layer 2 (ML2) plug-in
 
 Để nova sử dụng neutron services để quản lý mạng cho các máy ảo, cần cấu hình lại dịch vụ nova.
 Chỉnh sửa file 
