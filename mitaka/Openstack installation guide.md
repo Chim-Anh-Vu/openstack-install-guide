@@ -1,4 +1,4 @@
-#1. Giới thiệu về OpenStack
+#1 Giới thiệu về OpenStack
 OpenStack là một hệ thống cung cấp khả năng triển khai đám mây trên một nền tảng hệ thống máy chủ vật lý. Sử dụng OpenStack, người dùng có thể tạo ra, sử dụng và quản lý  một đám mây với các tài nguyên điện toán, lưu trữ và mạng thông qua  nhiều phương tiện khác nhau như giao diện dòng lệnh (CLI) hoặc thông qua giao diện web.
 
 Nói một cách dễ hiểu, OpenStack là một gói các dịch vụ cho phép thiết lập một đám mây trên 1 nền tảng vật lý. Điều kiện cần để triển khai OpenStack là chúng ta có một hệ thống máy chủ vật lý được kết nối với nhau. Sau đó trên từng đơn vị máy thành viên trong hệ thống sẽ được triển khai các dịch vụ của đám mây như: Xác thực(identity) , điện toán (compute), mạng(network), lưu trữ (storage), giao diện web… để tạo thành một đám mây hoàn chỉnh. Tùy thuộc vào dịch vụ được triển khai trên các máy vật lý, các tài nguyên vật lý sẽ được ánh xạ lên đám mây tạo ra các tài nguyên trên đám mây như các máy ảo, hệ thống lưu trữ và mạng.
@@ -92,7 +92,7 @@ Chỉnh sửa file  /etc/hosts để phân giải IP cho các node:
 Khởi động lại máy tính.
 
 ###2.2.2 Cài đặt dịch vụ MySQL, message queue, Network Time Protocol, message queue, memcached và OpenStack Client
-#### Cài đặt OpenStack Client
+####Cài đặt OpenStack Client
 OpenStack Client là services cho phép người dùng tương tác với hệ thống OpenStack thông qua các câu lệnh. Hiện tại OpenStack Client hỗ trợ các dịch vụ : keystone, image, object storage và compute
 
 Sau khi khởi động lại, ta kích hoạt repository Openstack:
@@ -110,7 +110,7 @@ Sau đó ta cài đặt OpenStack client:
 ```sh
 	# apt-get install python-openstackclient
 ```
-#### Cài đặt hệ quản trị cơ sở dữ liệu SQL
+####Cài đặt hệ quản trị cơ sở dữ liệu SQL
 
 Sau khi cài đặt OpenStack client, chúng ta cần cài đặt cơ sở dữ liệu lên controller node, vì các dịch vụ của OpenStack sử dụng SQL để lưu trữ thông tin.
 Ta cài đặt gói mariaDb:
@@ -138,7 +138,7 @@ khởi động lại service mysql:
 ```sh
 	# service mysql restart
 ```
-#### Cài đặt dịch vụ Network Time Protocol
+####Cài đặt dịch vụ Network Time Protocol
 Network Time Protocol là dịch vụ cho phép đồng bộ hóa giữa các máy tính trong mạng thông qua sử dụng NTP để đồng bộ thời gian giữa các máy.
 
 Để cài đặt dịch vụ NTP, ta cài đặt the packages chrony:
@@ -163,7 +163,7 @@ Khởi động lại dịch vụ :
 ```sh
 	# service chrony restart
 ```
-#### Cài đặt dịch vụ Message queue
+####Cài đặt dịch vụ Message queue
 Dịch vụ Message queue giúp các services của hệ thống trao đổi các thông điệp với  nhau. Ở bản cài đặt này ta sử dụng dịch vụ RabbitMQ.
 
 Ta cài đặt gói rabbitmq-server lên controller node:
@@ -178,15 +178,15 @@ Cấu hình RabbitMQ, tạo user openstack với mật khẩu là 1111:
 
 Gán quyền read, write cho tài khoản openstack trong RabbitMQ
 ```sh
-rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+	rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 ```
 
-#### Cài đặt dịch vụ Memcached
+####Cài đặt dịch vụ Memcached
 Dịch vụ xác thực sử dụng Memcached để làm bộ đệm lưu trữ các token, giúp cải thiện hiệu năng của hệ thống.
 
 Ta cài đặt các gói cần thiết cho memcached
 ```sh
-apt-get -y install memcached python-memcache
+	apt-get -y install memcached python-memcache
 ```
 Dùng nano  sửa ```sh file /etc/memcached.conf ```, thay dòng 
 ```sh -l 127.0.0.1 ``` 
@@ -244,8 +244,8 @@ Chỉnh sửa file  /etc/hosts để phân giải IP cho các node:
 	
 Khởi động lại máy tính.
 
-### 2.2.2 Cài đặt dịch vụ Network Time Protocol và OpenStack Client
-#### Cài đặt OpenStack Client
+###2.2.2 Cài đặt dịch vụ Network Time Protocol và OpenStack Client
+####Cài đặt OpenStack Client
 Sau khi khởi động lại, ta kích hoạt repository Openstack:
 ```sh
 	# apt-get install software-properties-common
@@ -259,7 +259,7 @@ Sau đó ta cài đặt OpenStack client:
 ```sh
 	#apt-get install python-openstackclient
 ```
-### Cài đặt và cấu hình NTP trên Compute node
+###Cài đặt và cấu hình NTP trên Compute node
 Ta cài đặt NTP Client
 ```sh
 	apt-get -y install chrony
@@ -279,10 +279,10 @@ Khởi động lại dịch vụ NTP
 ```sh
 	service chrony restart
 ```
-# 3 Cài đặt Keystone
-# 3.1 Giới thiệu dịch vụ Keystone
+#3 Cài đặt Keystone
+#3.1 Giới thiệu dịch vụ Keystone
 Dịch vụ Keystone là dịch vụ xác thực trong OpenStack (identity service),có vai trò cung cấp các chức năng quản lý xác thực, phân quyền và quản lý danh mục các services cho toàn bộ hệ thống. Bên cạnh đó, dịch vụ này lưu trữ thông tin các người sử dụng trong hệ thống. Tất cả các dữ liệu liên quan tới dịch vụ không được lưu trữ trực tiếp trong hệ thống OpenStack, mà được lưu trữ trong một hệ cơ sở dữ liệu như MySQL.
-### 3.1.1 Mô hình xác thực của Keystone
+###3.1.1 Mô hình xác thực của Keystone
 Mô hình xác thực của Keystone được xây dựng dựa trên các khái niệm sau:
 
 ``` User```: Đối tượng đại diện cho một cá nhân, một dịch vụ hoặc một hệ thống sử dụng các dịch vụ của OpenStack. Dịch vụ xác thực xác minh các yêu cầu xem nó có đúng là do User gắn với yêu cầu đó thực hiện hay không. User cần đăng nhập và sử dụng các thẻ (token) được dịch vụ xác thực cấp sau khi đăng nhập để truy cập tới các tài nguyên.
@@ -383,11 +383,15 @@ Sau khi triển khai xong hạ tầng mạng ảo, các user có thể sử dụ
 Hệ thống mạng self-service này được triển khai trên cấu hình vật lý đã giới thiệu ở đầu bài, gồm 1 node controller và một node compute. Sơ đồ triển khai hệ thống mạng như sau:
 
 ![self-service-architect1.png](./img/self-service-architect1.png)
+
 Triển khai chi tiết trong compte node và controller node được thể hiện như sau:
 
 Tại compute node:
+
 ![self-service-architect-compute-node.png](./img/self-service-architect-compute-node.png)
+
 Tại controller node:
+
 ![self-service-architect-controller-node.png](./img/self-service-architect-controller-node.png)
 
 Ở đây, chúng ta có thể thấy, một hệ thống mạng ảo được xây dựng dựa trên các thành phần thiết bị mạng ảo như Switch-Bridge, các card mạng (eth), router, dhcp,... Sau đó các thành phần thiết bị trên được triển khai trên các node tương ứng để cấu thành hệ thống mạng.
