@@ -289,17 +289,17 @@ Dịch vụ Keystone là dịch vụ xác thực trong OpenStack (identity servi
 ### 3.1.1 Mô hình xác thực của Keystone
 Mô hình xác thực của Keystone được xây dựng dựa trên các khái niệm sau:
 
-```sh User```: Đối tượng đại diện cho một cá nhân, một dịch vụ hoặc một hệ thống sử dụng các dịch vụ của OpenStack. Dịch vụ xác thực xác minh các yêu cầu xem nó có đúng là do User gắn với yêu cầu đó thực hiện hay không. User cần đăng nhập và sử dụng các thẻ (token) được dịch vụ xác thực cấp sau khi đăng nhập để truy cập tới các tài nguyên.
+``` User```: Đối tượng đại diện cho một cá nhân, một dịch vụ hoặc một hệ thống sử dụng các dịch vụ của OpenStack. Dịch vụ xác thực xác minh các yêu cầu xem nó có đúng là do User gắn với yêu cầu đó thực hiện hay không. User cần đăng nhập và sử dụng các thẻ (token) được dịch vụ xác thực cấp sau khi đăng nhập để truy cập tới các tài nguyên.
 
-```sh Credentials ```: Thông tin xác thực, dùng để xác nhận danh tính của User. Thông tin xác thực có thể là tên tài khoản và mật khẩu, hoặc tên tài khoản và khóa API (API key) hoặc là thẻ xác thực (token).
-```sh Authentication```: Quá trình xác nhận danh tính của User. Dịch vụ xác thực xác nhận một yêu cầu là do user nào đó gửi tới bằng cách xác nhận các thông tin xác thực được user cung cấp. 
+``` Credentials ```: Thông tin xác thực, dùng để xác nhận danh tính của User. Thông tin xác thực có thể là tên tài khoản và mật khẩu, hoặc tên tài khoản và khóa API (API key) hoặc là thẻ xác thực (token).
+``` Authentication```: Quá trình xác nhận danh tính của User. Dịch vụ xác thực xác nhận một yêu cầu là do user nào đó gửi tới bằng cách xác nhận các thông tin xác thực được user cung cấp. 
 Khởi đầu, User sẽ gửi thông tin xác thực là tên đăng nhập và mật khẩu. Sau khi xác nhận danh tính của User, dịch vụ xác thực sẽ cấp cho User thẻ xác thực (token) để người dùng sử dụng làm thông tin xác thực ( thay cho tên đăng nhập và mật khẩu) ở các yêu cầu sau ( Để đảm bảo tính bảo mật).
  
-```sh Token```: Thẻ xác thực, là một chuỗi ký tự được sử dụng để giúp người dùng truy cập vào các dịch vụ của OpenStack và các tài nguyên. Token có thể bị thu hồi ở bất kỳ thời điểm nào và chỉ có giá trị trong một khoảng thời gian hữu hạn. 
+``` Token```: Thẻ xác thực, là một chuỗi ký tự được sử dụng để giúp người dùng truy cập vào các dịch vụ của OpenStack và các tài nguyên. Token có thể bị thu hồi ở bất kỳ thời điểm nào và chỉ có giá trị trong một khoảng thời gian hữu hạn. 
 
-```sh Project ```: Đại diện cho một nhóm tài nguyên, một nhóm dịch vụ hoặc 1 nhóm người dùng.
+``` Project ```: Đại diện cho một nhóm tài nguyên, một nhóm dịch vụ hoặc 1 nhóm người dùng.
 
-```sh Service```: Dịch vụ trong OpenStack, như là dịch vụ điện toán (compute), dịch vụ lưu trữ (storage), dịch vụ cung cấp ảnh tệp (image). Các dịch vụ cung cấp các cổng đầu cuối (endpoint), là địa chỉ mà người dùng có thể truy cập vào để sử dụng tài nguyên hoặc thực hiện các thao tác.
+``` Service```: Dịch vụ trong OpenStack, như là dịch vụ điện toán (compute), dịch vụ lưu trữ (storage), dịch vụ cung cấp ảnh tệp (image). Các dịch vụ cung cấp các cổng đầu cuối (endpoint), là địa chỉ mà người dùng có thể truy cập vào để sử dụng tài nguyên hoặc thực hiện các thao tác.
 
 ```sh Endpoint```: Là địa chỉ trên mạng, nơi mà người dùng có thể truy cập tới các dịch vụ, thường là 1 địa chỉ URL.
 Role: Quy định một tập các quyền mà người dùng có thể thực hiện trên hệ thống. Một User có thể có nhiều roles.Trong OpenStack, thì thẻ xác thực sẽ chứa luôn thông tin về các quyền mà 1 user có. Các dịch vụ dựa vào các quyền có trong thẻ xác thực để xác định xem người dùng có quyền thực hiện yêu cầu gửi tới dịch vụ đó hay không.
