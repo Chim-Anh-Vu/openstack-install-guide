@@ -542,9 +542,59 @@ Neutron cần thông báo cho Nova khi cấu hình mạng (network topology) tha
 	username = nova
 	password = nova
 ```
+####Note: Viết 1 bài viết về ML2 và các plugin (Linux-bridge, OpenVswitch) của nó.
+
+####Cấu hình Modular Layer 2 (ML2) plug-in
+Trong bài hướng dẫn này, chúng ta sử dụng ML2 plugin kết hợp với Linux-bridge-agent để xây dựng nên Layer2 cho mạng ảo. Để cấu hình ML2 plug-in, tiến hành cập nhật file ```/etc/neutron/plugins/ml2/ml2_conf.ini```
+- Cập nhật section [ml2], option ``` type_driver``` cho phép chọn các loại mạng có thể được tạo ra và hoạt động bởi mechanism driver. Vì chúng ta sử dụng linux-bridge, chúng ta chọn các mạng flat, lan, vxlan
+```sh
+[ml2]
+	...
+	type_drivers = flat,vlan,vxlan
+```
+
+option ```mechanism_drivers``` cho phép thiết lập các plugin kết hợp với ml2 plugin. Ở đây ta thiết lập giá trị cho option này là linuxbridge và l2population
+```sh
+	[ml2]
+	...
+	mechanism_drivers = linuxbridge,l2population
+```
+
+option ```tenant_network_types``` cho phép thiết lập các loại mạng mà các user có thể tạo trong các project. Ở đây ta thiết lập loại mạng mà các user có thể tạo là ```vxlan```
+```sh
+	[ml2]
+	...
+	tenant_network_types = vxlan
+```
+kích hoạt port_security:
+```sh
+	[ml2]
+	...
+	extension_drivers = port_security
+```
+- Cập nhật section [ml2_type_flat], xác định interfaces vật lý hỗ trợ thiết lập mạng ảo flat. Ở đây chúng ta thiết lập giá chị cho option ```flat_networks``` là một ```provider label```. ```provider label``` là một nhãn logic được gán vào 1 interface vật lý. nhãn logic này sẽ được xác định sẽ gán vào interface vật lý nào khi chúng ta cấu hình linux-bridge. Ở đây chúng ta sử dụng tên nhãn logic là ```provider```
+```sh
+	[ml2_type_flat]
+	...
+	flat_networks = provider
+```
+- Cập nhật section [ml2_type_vxlan], xác định khoảng giá trị có thể dùng để gán ID cho các VXLAN. Như đã cấu hình ở option ```tenant_network_type```, các private network do user tạo ra sẽ có kiểu là vxlan. Để phân biệt được các máy thuộc các mạng ảo( tức các VXLAN ) khác nhau, thì mỗi VXLAN sẽ có 1 id riêng. Ở đây ta thiết lập giá trị cho option ```vni_ranges``` là ```1:1000```, tức là các VXLAN được tạo ra trong hệ thống mạng ảo sẽ nhận ID có giá trị từ 1 tới 1000.
+```sh
+	[ml2_type_vxlan]
+	...
+	vni_ranges = 1:1000
+```
+- Cập nhật section [securitygroup], cải thiện hiệu quả hoạt động của tường lủa bằng cách enable option ```enable_ipset```
+```sh
+	[securitygroup]
+	...
+	enable_ipset = True
+```
+####Cấu hình Linux bridge agent
 
 ####Cấu hình Neutron DHCP agent
 Dịch vụ ```neutron-dhcp-agent``` có chức năng tạo ra, quản lý, cấu hình và cung cấp các thông tin metadata về ```dnsmasq```, một loại DHCP ảo có chức năng cung cấp dịch vụ DHCP cho mạng ảo.
+
 Để cấu hình dịch vụ ```neutron-dhcp-agent```, chỉnh sửa file ```/etc/neutron/dhcp_agent.ini```, section [DEFAULT], chỉnh sửa option interface-driver sử dụng Linux-bridge, dhcp_drive sử dụng dnsmasq, và kích hoạt option enable_isolated_metadata để dhcp có thể đóng vai trò cung cấp metadata cho instance:
 ```sh
 	[DEFAULT]
@@ -554,15 +604,13 @@ Dịch vụ ```neutron-dhcp-agent``` có chức năng tạo ra, quản lý, cấ
 	enable_isolated_metadata = True
 ```
 ###Cấu hình L3 agent
-Dịch vụ ```neutron-l3-agent``` có chức năng tạo ra và quản lý các router ảo trên hệ thống mạng ảo. Cấu hình file ```/etc/neutron/l3_agent.ini```, thiết lập interface_driver sử dụng Linux-bridge và để trống giá trị external_network_bridge =
+Dịch vụ ```neutron-l3-agent``` có chức năng tạo ra và quản lý các router ảo trên hệ thống mạng ảo. Cấu hình file ```/etc/neutron/l3_agent.ini```, thiết lập interface_driver sử dụng Linux-bridge và để trống giá trị external_network_bridge
 ```sh
 	[DEFAULT]
 	...
 	interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
 	external_network_bridge =
 ```
-###Cấu hình Modular Layer 2 (ML2) plug-in
-
 Để nova sử dụng neutron services để quản lý mạng cho các máy ảo, cần cấu hình lại dịch vụ nova.
 Chỉnh sửa file 
 /etc/nova/nova.conf
