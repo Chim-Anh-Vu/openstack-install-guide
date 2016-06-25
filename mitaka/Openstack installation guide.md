@@ -468,7 +468,7 @@ Ta tiến hành tải về các dịch vụ của neutron trên controller node:
 	neutron-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \ neutron-metadata-agent
 ```
 Tiếp theo, ta cấu hình các dịch vụ của neutron
-###6.3.3 Cấu hình cài đặt neutron
+###6.3.3 Cấu hình cài đặt neutron trên controller node
 Đầu tiên, ta cấu hình file /etc/neutron/neutron.conf:
 ####Cấu hình để neutron sử dụng database
 Chỉnh sửa section [database] để neutron có thể sử dụng database neutron mà chúng ta vừa tạo ở phần trước:
@@ -591,6 +591,29 @@ kích hoạt port_security:
 	enable_ipset = True
 ```
 ####Cấu hình Linux bridge agent
+Để cấu hình Linux bridge agent, chúng ta chỉnh sửa file ```/etc/neutron/plugins/ml2/linuxbridge_agent.ini```
+- Cập nhật section [linux_bridge], xác định ánh xạ giữa interface vật lý với tên nhãn logic:
+```sh
+	[linux_bridge]
+	physical_interface_mappings = provider:eth1
+```
+Ở đây, chúng ta ánh xạ nhãn logic ```provider``` với card vật lý eth1. Cấu hình này có liên quan tới việc chúng ta thiết lập mạng flat ở phần cấu hình trước trên ml2 plugin. Khi chúng ta thiết lập cấu hình này, thông qua nhãn logic provider, chúng ta có thể triển khai một mạng flat network ảo trên các card mạng vật lý eth1. Ở các phần sau, mạng flat network này sẽ là provider external network, cung cấp kết nối internet cho các private network thông qua các router. Chúng ta triển khai mạng flat network này trên các card mạng eth1, vì các card eth1 này kết nối tới mạng internet bên ngoài.
+- Cập nhật section [vxlan], kích hoạt option enable_vxlan để linux_bridge hỗ trợ VXLAN, kích hoạt l2_population option và ánh xạ ```local_ip``` sang địa chỉ ip của card mạng sẽ triển khai vxlan network. Ở cấu hình đang cài đặt, chúng ta sẽ triển khai các VXLAN (các private network của các user) thông qua mạng vật lý management network. Do vậy, ở từng node chúng ta sẽ cấu hình giá trị của option này tương ứng với các ip của mạng này trên các node. Ở trên controller node, management network có 1 ip 10.10.10.10 trên card eth0. Do đó chúng ta sẽ sử dụng giá trị này gán cho option ```local_ip```
+```sh
+	[vxlan]
+	enable_vxlan = True
+	local_ip = 10.10.10.10
+	l2_population = True
+```
+
+- Cập nhật section [securitygroup], để kích hoạt firewall trên linux_bridge
+####firewall này triển khai trên bridge nào ?
+```sh
+	[securitygroup]
+	...
+	enable_security_group = True
+	firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+```
 
 ####Cấu hình Neutron DHCP agent
 Dịch vụ ```neutron-dhcp-agent``` có chức năng tạo ra, quản lý, cấu hình và cung cấp các thông tin metadata về ```dnsmasq```, một loại DHCP ảo có chức năng cung cấp dịch vụ DHCP cho mạng ảo.
@@ -611,26 +634,96 @@ Dịch vụ ```neutron-l3-agent``` có chức năng tạo ra và quản lý các
 	interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
 	external_network_bridge =
 ```
-Để nova sử dụng neutron services để quản lý mạng cho các máy ảo, cần cấu hình lại dịch vụ nova.
-Chỉnh sửa file 
-/etc/nova/nova.conf
+####Cấu hình lại nova để sử dụng neutron
+Để nova sử dụng neutron services để quản lý mạng cho các máy ảo, cần cấu hình lại dịch vụ nova.Chỉnh sửa file 
+```sh
+	/etc/nova/nova.conf
+```
 Cập nhật các section sau để cung cấp cho nova endpoint của neutron services:
-[DEFAULT]
-...
-network_api_class = nova.network.neutronv2.api.API
-[neutron]
-...
-url = http://controller:9696
+```sh
+	[DEFAULT]
+	...
+	network_api_class = nova.network.neutronv2.api.API
+	[neutron]
+	...
+	url = http://controller:9696
+```
 Cập nhật thông tin xác thực của neutron cho nova:
-[neutron]
-...
-auth_strategy = keystone
-admin_tenant_name = service
-admin_username = neutron
-admin_password = 1111
-admin_auth_url = http://controller01:35357/v2.0
+```sh
+	[neutron]
+	...
+	auth_strategy = keystone
+	admin_tenant_name = service
+	admin_username = neutron
+	admin_password = 1111
+	admin_auth_url = http://controller01:35357/v2.0
+```
+###6.3.4 Chuẩn bị các thành phần của neutron trên compute node
+Trên compute node, ta sẽ triển khai thành phần neutron-linuxbridge-agent. Tải về neutron-linuxbridge-agent:
+```sh
+	# apt-get install neutron-linuxbridge-agent
+```
+###6.3.5 Cấu hình neutron trên compute node
+Ta cấu hình file /etc/neutron/neutron.conf:
+####Cấu hình để neutron sử dụng messaging service
+Neutron liên lạc với các dịch vụ khác thông qua messaging service. Cập nhật section [DEFAULT] và section [oslo_messaging_rabbit] để cấu hình giúp neutron sử dụng messaging service:
+```sh
+	[DEFAULT]
+	...
+	rpc_backend = rabbit
+```
+Phần xác thực cho rabbit_mq phải khớp với các thông tin ta thiết lập khi cài đặt messaging service ở phần trước đó:
+```sh
+	[oslo_messaging_rabbit]
+	...
+	rabbit_host = controller
+	rabbit_userid = openstack
+	rabbit_password = 1111
+```
+####Cấu hình để neutron sử dụng dịch vụ xác thực Keystone
+Để hệ thống mạng neutron hoạt động, cần cấp quyền admin cho dịch vụ neutron để neutron có thể sử dụng được các dịch vụ khác khi hoạt động. 
 
+Chỉnh sửa section [DEFAULT] để thiết lập keystone là phương thức xác thực cho neutron:
+```sh
+	[DEFAULT]
+	...
+	auth_strategy = keystone
+```
 
+Cập nhật section [keystone_authtoken] để gán user neutron mà ta mới tạo ở phần trước cho neutron services, neutron service sẽ sử dụng user này khi xác thực với keystone:
+```sh
+	[keystone_authtoken]
+	...
+	auth_uri = http://controller:5000
+	auth_url = http://controller:35357
+	auth_plugin = password
+	project_domain_id = default
+	user_domain_id = default
+	project_name = service
+	username = neutron
+	password = 1111
+```
+
+####Cấu hình neutron để thông báo các sự kiện cho nova
+
+Neutron cần thông báo cho Nova khi cấu hình mạng (network topology) thay đổi. Cập nhật các section [DEFAULT] và [nova] 
+```sh
+	[DEFAULT]
+	...
+	notify_nova_on_port_status_changes = True
+	notify_nova_on_port_data_changes = True
+	nova_url = http://controller:8774/v2
+	[nova]
+	...
+	auth_url = http://controller:35357
+	auth_plugin = password
+	project_domain_id = default
+	user_domain_id = default
+	region_name = RegionOne
+	project_name = service
+	username = nova
+	password = nova
+```
 
 
 ## Check virtual machine (Instance)
